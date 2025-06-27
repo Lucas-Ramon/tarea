@@ -1,0 +1,6 @@
+ms-dotnettools.csharp requested to download the .NET ASP.NET Runtime.
+Downloading .NET version(s) 9.0.6~x64~aspnetcore ............................................... Done!
+.NET 9.0.6~x64~aspnetcore executable path: c:\Users\lispa\AppData\Roaming\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\.dotnet\9.0.6~x64~aspnetcore\dotnet.exe
+
+ms-dotnettools.csharp: Trying to install .NET 9.0.6~x64~aspnetcore but it already exists. No downloads or changes were made.
+ms-dotnettools.csdevkit: Trying to install .NET 9.0.6~x64~aspnetcore but it already exists. No downloads or changes were made.
