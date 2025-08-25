@@ -1,124 +1,89 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using System.Text;
 
-class Program
+class ProgramaVacunacion
 {
-    // Función para verificar si una expresión está balanceada
-    public static bool EstaBalanceada(string expresion)
-    {
-        Stack<char> pila = new Stack<char>();
-        foreach (char c in expresion)
-        {
-            if (c == '(' || c == '{' || c == '[')
-            {
-                pila.Push(c);
-            }
-            else if (c == ')' || c == '}' || c == ']')
-            {
-                if (pila.Count == 0) return false;
-
-                char tope = pila.Pop();
-                if ((c == ')' && tope != '(') ||
-                    (c == '}' && tope != '{') ||
-                    (c == ']' && tope != '['))
-                {
-                    return false;
-                }
-            }
-        }
-        return pila.Count == 0;
-    }
-
-    // Clase para representar una torre con pila de discos
-    class Torre
-    {
-        public Stack<int> discos = new Stack<int>();
-        public string nombre;
-
-        public Torre(string nombre)
-        {
-            this.nombre = nombre;
-        }
-
-        public void MoverDiscoA(Torre destino)
-        {
-            int disco = discos.Pop();
-            destino.discos.Push(disco);
-            Console.WriteLine($"Mover disco {disco} de {nombre} a {destino.nombre}");
-        }
-    }
-
-    // Método recursivo para resolver las Torres de Hanoi
-    public static void ResolverHanoi(int n, Torre origen, Torre auxiliar, Torre destino)
-    {
-        if (n == 1)
-        {
-            origen.MoverDiscoA(destino);
-        }
-        else
-        {
-            ResolverHanoi(n - 1, origen, destino, auxiliar);
-            origen.MoverDiscoA(destino);
-            ResolverHanoi(n - 1, auxiliar, origen, destino);
-        }
-    }
-
-    // Menú principal
     static void Main()
     {
-        int opcion;
-        do
+        // 1. Crear conjunto de 500 ciudadanos
+        HashSet<string> ciudadanos = new HashSet<string>();
+        for (int i = 1; i <= 500; i++)
         {
-            Console.WriteLine("\n--- MENÚ PRINCIPAL ---");
-            Console.WriteLine("1. Verificar paréntesis balanceados");
-            Console.WriteLine("2. Resolver Torres de Hanoi");
-            Console.WriteLine("3. Salir");
-            Console.Write("Seleccione una opción: ");
-            if (!int.TryParse(Console.ReadLine(), out opcion)) opcion = 0;
+            ciudadanos.Add($"Ciudadano {i}");
+        }
 
-            switch (opcion)
-            {
-                case 1:
-                    Console.Write("\nIngrese la expresión matemática: ");
-                    string expresion = Console.ReadLine();
-                    if (EstaBalanceada(expresion))
-                        Console.WriteLine("✔ Fórmula balanceada.");
-                    else
-                        Console.WriteLine("✘ Fórmula no balanceada.");
-                    break;
+        // 2. Crear conjunto de 75 vacunados con Pfizer
+        HashSet<string> pfizer = new HashSet<string>();
+        for (int i = 1; i <= 75; i++)
+        {
+            pfizer.Add($"Ciudadano {i}");
+        }
 
-                case 2:
-                    Console.Write("\nIngrese la cantidad de discos: ");
-                    int discos;
-                    if (int.TryParse(Console.ReadLine(), out discos) && discos > 0)
-                    {
-                        Torre torreA = new Torre("A");
-                        Torre torreB = new Torre("B");
-                        Torre torreC = new Torre("C");
+        // 3. Crear conjunto de 75 vacunados con AstraZeneca
+        HashSet<string> astraZeneca = new HashSet<string>();
+        for (int i = 50; i < 125; i++) // solapamiento intencional para tener ciudadanos con ambas dosis
+        {
+            astraZeneca.Add($"Ciudadano {i}");
+        }
 
-                        for (int i = discos; i >= 1; i--)
-                        {
-                            torreA.discos.Push(i);
-                        }
+        // 4. Operaciones de teoría de conjuntos
 
-                        Console.WriteLine("\nMovimientos:");
-                        ResolverHanoi(discos, torreA, torreB, torreC);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Número de discos inválido.");
-                    }
-                    break;
+        // Ciudadanos vacunados (Pfizer ∪ AstraZeneca)
+        HashSet<string> vacunados = new HashSet<string>(pfizer);
+        vacunados.UnionWith(astraZeneca);
 
-                case 3:
-                    Console.WriteLine("Saliendo del programa...");
-                    break;
+        // No vacunados (Total - Vacunados)
+        HashSet<string> noVacunados = new HashSet<string>(ciudadanos);
+        noVacunados.ExceptWith(vacunados);
 
-                default:
-                    Console.WriteLine("Opción no válida. Intente nuevamente.");
-                    break;
-            }
+        // Ambas dosis (Pfizer ∩ AstraZeneca)
+        HashSet<string> ambasDosis = new HashSet<string>(pfizer);
+        ambasDosis.IntersectWith(astraZeneca);
 
-        } while (opcion != 3);
+        // Solo Pfizer (Pfizer - AstraZeneca)
+        HashSet<string> soloPfizer = new HashSet<string>(pfizer);
+        soloPfizer.ExceptWith(astraZeneca);
+
+        // Solo AstraZeneca (AstraZeneca - Pfizer)
+        HashSet<string> soloAstraZeneca = new HashSet<string>(astraZeneca);
+        soloAstraZeneca.ExceptWith(pfizer);
+
+        // 5. Mostrar resultados
+        Console.WriteLine("=== Resultados de la Campaña de Vacunación ===\n");
+
+        Console.WriteLine($"Total ciudadanos: {ciudadanos.Count}");
+        Console.WriteLine($"Vacunados con Pfizer: {pfizer.Count}");
+        Console.WriteLine($"Vacunados con AstraZeneca: {astraZeneca.Count}");
+        Console.WriteLine($"No vacunados: {noVacunados.Count}");
+        Console.WriteLine($"Ambas dosis: {ambasDosis.Count}");
+        Console.WriteLine($"Solo Pfizer: {soloPfizer.Count}");
+        Console.WriteLine($"Solo AstraZeneca: {soloAstraZeneca.Count}\n");
+
+        // (Opcional) Generar archivo de reporte en TXT
+        GenerarReporte(noVacunados, ambasDosis, soloPfizer, soloAstraZeneca);
+    }
+
+    static void GenerarReporte(HashSet<string> noVacunados,
+                               HashSet<string> ambasDosis,
+                               HashSet<string> soloPfizer,
+                               HashSet<string> soloAstraZeneca)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("=== REPORTE DE VACUNACIÓN COVID-19 ===\n");
+        sb.AppendLine("Ciudadanos NO vacunados:");
+        sb.AppendLine(string.Join(", ", noVacunados));
+        sb.AppendLine("\nCiudadanos con AMBAS dosis:");
+        sb.AppendLine(string.Join(", ", ambasDosis));
+        sb.AppendLine("\nCiudadanos SOLO Pfizer:");
+        sb.AppendLine(string.Join(", ", soloPfizer));
+        sb.AppendLine("\nCiudadanos SOLO AstraZeneca:");
+        sb.AppendLine(string.Join(", ", soloAstraZeneca));
+
+        File.WriteAllText("ReporteVacunacion.txt", sb.ToString());
+        Console.WriteLine("Reporte generado: ReporteVacunacion.txt");
     }
 }
+
