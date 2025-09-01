@@ -1,61 +1,117 @@
-﻿// Clase que representa una persona
-public class Persona
+using System;
+using System.Collections.Generic;
+
+class Traductor
 {
-    public int Id { get; set; }
-    public string Nombre { get; set; }
-
-    public Persona(int id, string nombre)
+    // Diccionario base (Español -> Inglés)
+    static Dictionary<string, string> diccionario = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
-        Id = id;
-        Nombre = nombre;
-    }
-}
+        {"tiempo", "time"},
+        {"persona", "person"},
+        {"año", "year"},
+        {"camino", "way"},
+        {"forma", "way"},
+        {"día", "day"},
+        {"cosa", "thing"},
+        {"hombre", "man"},
+        {"mundo", "world"},
+        {"vida", "life"},
+        {"mano", "hand"},
+        {"parte", "part"},
+        {"niño", "child"},
+        {"niña", "child"},
+        {"ojo", "eye"},
+        {"mujer", "woman"},
+        {"lugar", "place"},
+        {"trabajo", "work"},
+        {"semana", "week"},
+        {"caso", "case"},
+        {"punto", "point"},
+        {"tema", "point"},
+        {"gobierno", "government"},
+        {"empresa", "company"},
+        {"compañía", "company"}
+    };
 
-// Clase que maneja la atracción y los asientos
-public class Atraccion
-{
-    private Queue<Persona> colaEspera;
-    private List<Persona> asientosOcupados;
-    private int capacidad = 30;
-
-    public Atraccion()
+    static void Main()
     {
-        colaEspera = new Queue<Persona>();
-        asientosOcupados = new List<Persona>();
-    }
-
-    // Registrar persona en la cola
-    public void RegistrarPersona(Persona persona)
-    {
-        if (asientosOcupados.Count >= capacidad)
+        int opcion;
+        do
         {
-            Console.WriteLine($"🚫 Ya no hay asientos disponibles para {persona.Nombre}");
+            Console.WriteLine("\n==================== MENÚ ====================");
+            Console.WriteLine("1. Traducir una frase");
+            Console.WriteLine("2. Agregar palabras al diccionario");
+            Console.WriteLine("0. Salir");
+            Console.Write("Seleccione una opción: ");
+
+            if (!int.TryParse(Console.ReadLine(), out opcion))
+            {
+                Console.WriteLine("Opción inválida.");
+                continue;
+            }
+
+            switch (opcion)
+            {
+                case 1:
+                    TraducirFrase();
+                    break;
+                case 2:
+                    AgregarPalabra();
+                    break;
+                case 0:
+                    Console.WriteLine("Saliendo del traductor...");
+                    break;
+                default:
+                    Console.WriteLine("Opción no válida.");
+                    break;
+            }
+
+        } while (opcion != 0);
+    }
+
+    static void TraducirFrase()
+    {
+        Console.Write("\nIngrese una frase en español: ");
+        string frase = Console.ReadLine();
+
+        string[] palabras = frase.Split(new char[] { ' ', ',', '.', ';', ':', '!', '?' }, StringSplitOptions.None);
+        string resultado = frase;
+
+        foreach (string palabra in palabras)
+        {
+            if (diccionario.ContainsKey(palabra.ToLower()))
+            {
+                string traduccion = diccionario[palabra.ToLower()];
+                resultado = ReplaceWord(resultado, palabra, traduccion);
+            }
+        }
+
+        Console.WriteLine("\nTraducción (parcial):");
+        Console.WriteLine(resultado);
+    }
+
+    // Método que reemplaza palabra respetando mayúsculas y signos
+    static string ReplaceWord(string frase, string original, string traduccion)
+    {
+        return System.Text.RegularExpressions.Regex.Replace(frase, $@"\b{original}\b", traduccion, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    }
+
+    static void AgregarPalabra()
+    {
+        Console.Write("\nIngrese la palabra en español: ");
+        string esp = Console.ReadLine().ToLower();
+
+        Console.Write("Ingrese la traducción en inglés: ");
+        string eng = Console.ReadLine().ToLower();
+
+        if (!diccionario.ContainsKey(esp))
+        {
+            diccionario.Add(esp, eng);
+            Console.WriteLine($"Palabra agregada: {esp} -> {eng}");
         }
         else
         {
-            colaEspera.Enqueue(persona);
-            Console.WriteLine($"✅ {persona.Nombre} se ha registrado en la cola.");
-        }
-    }
-
-    // Asignar asientos en orden
-    public void AsignarAsientos()
-    {
-        while (colaEspera.Count > 0 && asientosOcupados.Count < capacidad)
-        {
-            Persona persona = colaEspera.Dequeue();
-            asientosOcupados.Add(persona);
-            Console.WriteLine($"🎟️ Asiento asignado a {persona.Nombre}");
-        }
-    }
-
-    // Reporte
-    public void MostrarAsientosAsignados()
-    {
-        Console.WriteLine("\n📋 Lista de personas con asiento:");
-        foreach (var persona in asientosOcupados)
-        {
-            Console.WriteLine($"Asiento #{persona.Id}: {persona.Nombre}");
+            Console.WriteLine("La palabra ya existe en el diccionario.");
         }
     }
 }
